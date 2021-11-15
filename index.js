@@ -7,7 +7,7 @@ const admin = require("firebase-admin");
 const { MongoClient } = require('mongodb');
 const port = process.env.PORT || 5000;
 
-const serviceAccount = require('./car-portal-firebase-adminsdk.json');
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
