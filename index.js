@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const cors = require('cors');
+const ObjectId = require('mongodb').ObjectId;
 require('dotenv').config();
 const admin = require("firebase-admin");
 
@@ -47,6 +48,7 @@ async function run(){
   const appointmentsCollection = database.collection('appointments');
   const usersCollection = database.collection('users');
   const productsCollection = database.collection('products');
+  const orderCollecttion = database.collection('orders');
 
   app.get('/appointments', async (req,res)=>{
     const email = req.query.email;
@@ -63,11 +65,25 @@ async function run(){
     res.json(result)
 });
 
+  //get orders
+  app.post('/orders', async (req, res) => {
+    const order = req.body;
+    const result = await orderCollecttion.insertOne(order);
+    res.json(result)
+});
+
 app.get('/products', async (req,res)=>{
   
   const cursor = productsCollection.find();
   const products= await cursor.toArray();
   res.json(products);
+})
+//Specific pproduct get
+app.get('/products/:id', async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: ObjectId(id) };
+  const result = await productsCollection.findOne(query);
+  res.json(result);
 })
 
 
@@ -80,6 +96,23 @@ app.get('/users/:email', async (req, res) => {
       isAdmin = true;
   }
   res.json({ admin: isAdmin });
+})
+
+
+
+// get orders for specific user
+app.get('/orders/:email', async (req, res) => {
+  const email = req.params.email;
+  console.log(email)
+  const query = { email: email };
+  const orders = await orderCollecttion.find(query);
+  const ordersArray= await orders.toArray();
+  console.log(orders);
+  // let isAdmin = false;
+  // if (user?.role === 'admin') {
+  //     isAdmin = true;
+  // }
+  res.json( ordersArray);
 })
 
 
