@@ -49,6 +49,7 @@ async function run(){
   const usersCollection = database.collection('users');
   const productsCollection = database.collection('products');
   const orderCollecttion = database.collection('orders');
+  const reviewCollecttion = database.collection('reviews');
 
   app.get('/appointments', async (req,res)=>{
     const email = req.query.email;
@@ -108,12 +109,30 @@ app.get('/orders/:email', async (req, res) => {
   const orders = await orderCollecttion.find(query);
   const ordersArray= await orders.toArray();
   console.log(orders);
-  // let isAdmin = false;
-  // if (user?.role === 'admin') {
-  //     isAdmin = true;
-  // }
   res.json( ordersArray);
 })
+
+// get orders for Admin
+app.get('/orders', async (req, res) => {
+  const orders = await orderCollecttion.find();
+  const ordersArray= await orders.toArray();
+  res.json( ordersArray);
+})
+
+// get reviews to Home page
+app.get('/reviews', async (req, res) => {
+  const reviews = await reviewCollecttion.find();
+  const reviewsArray= await reviews.toArray();
+  res.json( reviewsArray);
+})
+
+
+app.post('/postreview', async (req, res) => {
+  const review = req.body;
+  const result = await reviewCollecttion.insertOne(review);
+  console.log(result);
+  res.json(result);
+});
 
 
 app.post('/users', async (req, res) => {
@@ -152,6 +171,23 @@ app.put('/users/admin', verifyToken, async (req, res) => {
       res.status(403).json({ message: 'you do not have access to make admin' })
   }
 
+})
+//Delete product api
+app.delete('/products/:usid', async(req,res) => {
+  const id = req.params.usid;
+  console.log(id);
+  const query = {_id: ObjectId(id)}
+  const result = await productsCollection.deleteOne(query);
+  res.send(result);
+  
+})
+//Delete User order api
+app.delete('/orders/:usid', async(req,res) => {
+  const id = req.params.usid;
+  const query = {_id: ObjectId(id)}
+  const result = await orderCollecttion.deleteOne(query);
+  res.send(result);
+  
 })
 
 
